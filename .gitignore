@@ -1,0 +1,39 @@
+# Project exclude paths
+/.gradle/
+/Blockchain/task/build/
+/Blockchain/task/out/
+/Blockchain/task/out/production/classes/
+/Topics/Collectors/ASCII Art/out/
+/Topics/Collectors/ASCII Art/out/production/classes/
+/Topics/Collectors/Set average/out/
+/Topics/Collectors/Set average/out/production/classes/
+/Topics/Facade/Cinema Facade/out/
+/Topics/Facade/Cinema Facade/out/production/classes/
+/Topics/Facade/Computer Facade/out/
+/Topics/Facade/Computer Facade/out/production/classes/
+/Topics/Facade/Smart house/out/
+/Topics/Facade/Smart house/out/production/classes/
+/Topics/Functional data processing with streams/Count passwords/out/
+/Topics/Functional data processing with streams/Count passwords/out/production/classes/
+/Topics/Functional data processing with streams/Print elements of a stream/out/
+/Topics/Functional data processing with streams/Print elements of a stream/out/production/classes/
+/Topics/Functional data processing with streams/Statements about stream operations/out/
+/Topics/Functional data processing with streams/Statements about stream operations/out/production/classes/
+/Topics/Functional data processing with streams/Theory/out/
+/Topics/Functional data processing with streams/Theory/out/production/classes/
+/Topics/Infinite streams/Generating cats/out/
+/Topics/Infinite streams/Generating cats/out/production/classes/
+/Topics/Map and flatMap/Maximum of the absolute values/out/
+/Topics/Map and flatMap/Maximum of the absolute values/out/production/classes/
+/Topics/Parallel streams/Inverting streams/out/
+/Topics/Parallel streams/Inverting streams/out/production/classes/
+/Topics/Standard functional interfaces/Ternary operator/out/
+/Topics/Standard functional interfaces/Ternary operator/out/production/classes/
+/Topics/Standard functional interfaces/Theory/out/
+/Topics/Standard functional interfaces/Theory/out/production/classes/
+/Topics/Stream filtering/Check if a number is prime/out/
+/Topics/Stream filtering/Check if a number is prime/out/production/classes/
+/Topics/Stream filtering/Omitting long strings/out/
+/Topics/Stream filtering/Omitting long strings/out/production/classes/
+/Topics/Stream filtering/Theory/out/
+/Topics/Stream filtering/Theory/out/production/classes/
