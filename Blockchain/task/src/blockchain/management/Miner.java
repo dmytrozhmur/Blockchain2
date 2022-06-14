@@ -1,11 +1,29 @@
 package blockchain.management;
 
+import blockchain.exceptions.IllegalTransactionArgumentException;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static blockchain.utils.Constants.*;
 import static blockchain.utils.Encryption.getRandomNumber;
 
 public class Miner extends MoneyHandler {
+    private static final FileOutputStream errorLogger;
+
+    static {
+        try {
+            errorLogger = new FileOutputStream("logger.txt", false);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public Miner(BlockChain blockChain) {
         super("miner", blockChain);
     }
@@ -22,7 +40,19 @@ public class Miner extends MoneyHandler {
                         String.valueOf(getRandomNumber(getMoneyHeld()) + 1),
                         getRandomReceiver().toString()
                 });
-            } catch (RuntimeException re) {}
+            } catch (IllegalTransactionArgumentException itae) {
+                log(itae.getMessage() + "\n");
+            }
+        }
+    }
+
+    private void log(String message) {
+        try {
+            errorLogger.write(String
+                    .format("%s : %s : %s", LocalDateTime.now(), nickName, message)
+                    .getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -30,11 +60,11 @@ public class Miner extends MoneyHandler {
         LocalTime before = LocalTime.now();
 
         long generatedYet = blockChain.getSize();
-        Block newBlock = new Block(nickName);
+        Block newBlock = new Block();
         Block prevBlock = blockChain.getTail();
 
         do {
-            newBlock.init(blockChain.getN(), prevBlock);
+            newBlock.init(prevBlock);
         } while (!newBlock.isProved(blockChain.getN()));
 
         LocalTime after = LocalTime.now();
@@ -43,11 +73,33 @@ public class Miner extends MoneyHandler {
         synchronized (blockChain) {
             if(generatedYet != blockChain.getSize()
                     || !blockChain.addBlock(newBlock)) return null;
-            newBlock.setCreationTime((float) generationTime / SECONDTONANOS);
-            newBlock.setZerosDiff(blockChain.checkN(generationTime));
-            if(blockChain.getSize() > 1) newBlock.setMessages(blockChain.getLastTransaction());
+
+            long size = blockChain.getSize();
+            if(size > 1) newBlock.setMessages(blockChain.getLastTransaction());
+            if(size <= BLOCKCHAIN_PRINTED_SIZE) printResult(newBlock, generationTime);
             return newBlock;
         }
+    }
 
+    private void printResult(Block block, long generationTime) {
+        System.out.println("Block:\nCreated by " + nickName);
+        System.out.println(nickName + " gets 100 VC");
+        System.out.println("Id: " + block.getId());
+        System.out.println("Timestamp: " + block.getTimeStamp());
+        System.out.println("Magic number: " + block.getMagicNumber());
+        System.out.println("Hash of the previous block:\n" + block.getPreviousHash());
+        System.out.println("Hash of the block:\n" + block.hash());
+
+        System.out.println("Block data:");
+        if(block.checkMessages()) System.out.println(NO_TRANSACTIONS);
+        else block.getMessages().forEach(System.out::println);
+
+        System.out.printf("Block was generated for %f seconds\n", (double) generationTime / SECOND_TO_NANOS);
+
+        int zerosDiff = blockChain.checkN(generationTime);
+        if(zerosDiff == 1) System.out.println("N was increased to " + blockChain.getN());
+        else if(zerosDiff == -1) System.out.println("N was decreased by 1");
+        else System.out.println("N stays the same");
+        System.out.println();
     }
 }

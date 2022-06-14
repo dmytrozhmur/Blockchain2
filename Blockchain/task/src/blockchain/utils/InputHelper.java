@@ -1,5 +1,7 @@
 package blockchain.utils;
 
+import blockchain.exceptions.InputHelperClosedException;
+
 import java.util.Scanner;
 
 public class InputHelper {
@@ -8,11 +10,14 @@ public class InputHelper {
     public synchronized static String getMessage() {
         if(!isClosed) {
             String result;
-            while ((result = scanner.nextLine()).isEmpty()) {}
+            do {
+                result = scanner.nextLine();
+            } while (result.isEmpty());
             return result;
+        } else {
+            throw new InputHelperClosedException(
+                    InputHelper.class.getSimpleName().toLowerCase() + " is closed");
         }
-        else throw new RuntimeException(
-                InputHelper.class.getSimpleName().toLowerCase() + " is closed");
     }
 
     public static void off() {
