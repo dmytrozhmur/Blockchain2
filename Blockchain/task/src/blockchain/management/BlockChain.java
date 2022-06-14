@@ -5,31 +5,31 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static blockchain.utils.Constants.*;
+
 public class BlockChain implements Iterable<Block>, Serializable {
     private Block head;
     private Block tail;
     private long size;
-    private AtomicLong lastId = new AtomicLong(0);
-    private AtomicInteger N = new AtomicInteger(0);
+    private AtomicLong lastBlockId = new AtomicLong(Long.parseLong(ZERO));
+    private AtomicInteger N = new AtomicInteger(Integer.parseInt(ZERO));
     private NavigableSet<Transaction> transactions = new TreeSet<>(Comparator.comparingLong(Transaction::getId));
     private ArrayList<MoneyHandler> moneyHandlers = new ArrayList<>();
 
     public BlockChain() {}
 
-    public void checkValidityOf(Block beingChecked) throws InvalidObjectException {
-        if(beingChecked.isProved(N.get()) && (tail == null
-                || Objects.equals(tail.hash(), beingChecked.getPreviousHash()))) return;
-
-        throw new InvalidObjectException("Block isn't valid");
+    public boolean isInvalid(Block beingChecked) {
+        return !beingChecked.isProved(getN()) || (tail != null
+                && !Objects.equals(tail.hash(), beingChecked.getPreviousHash()));
     }
 
     public byte checkN(long generationTime) {
-        if(generationTime > 1_000_000_000) {
+        if(generationTime > SECOND_TO_NANOS) {
             N.decrementAndGet();
             return -1;
         }
 
-        if(generationTime < 10_000_000) {
+        if(generationTime < SECOND_TENTH_TO_NANOS) {
             N.incrementAndGet();
             return 1;
         }
@@ -37,23 +37,8 @@ public class BlockChain implements Iterable<Block>, Serializable {
         return 0;
     }
 
-    public void printBlocks(int bound) {
-        if(0 > bound || bound > size)
-            throw new IllegalArgumentException();
-
-        int counter = 0;
-        for (Block block: this) {
-            block.print();
-            if(counter++ == bound) return;
-        }
-    }
-
     public boolean addBlock(Block newBlock) {
-        try {
-            checkValidityOf(newBlock);
-        } catch (InvalidObjectException e) {
-            return false;
-        }
+        if(isInvalid(newBlock)) return false;
 
         if(head == null) head = newBlock;
         else tail.next = newBlock;
@@ -72,10 +57,11 @@ public class BlockChain implements Iterable<Block>, Serializable {
         return size;
     }
 
-    public synchronized void addTransanction(Transaction transaction) {
-        if(transactions.isEmpty() || transaction.getId() > transactions.last().getId()
-                && tail.checkMessages() || transaction.getId() > tail.getMessages().last().getId())
-            transactions.add(transaction);
+    public synchronized void addTransaction(Transaction transaction) {
+        boolean transact = transactions.isEmpty() || transaction.getId() > transactions.last().getId();
+        boolean tail = this.tail == null || this.tail.checkMessages() || transaction.getId() > this.tail.getMessages().last().getId();
+        boolean isTransactionValid = transact && tail;
+        if(isTransactionValid) transactions.add(transaction);
     }
 
     public List<Transaction> getLastTransaction() {
@@ -85,7 +71,7 @@ public class BlockChain implements Iterable<Block>, Serializable {
     }
 
     public long getId() {
-        return lastId.incrementAndGet();
+        return lastBlockId.incrementAndGet();
     }
 
     public void setMoneyHandlers(Collection<MoneyHandler> moneyHandlers) {
@@ -108,7 +94,6 @@ public class BlockChain implements Iterable<Block>, Serializable {
 
     private class BlockItr implements Iterator<Block> {
         private Block curr;
-        private Block lastReturned;
 
         public BlockItr(Block curr) {
             this.curr = curr;
@@ -121,7 +106,7 @@ public class BlockChain implements Iterable<Block>, Serializable {
 
         @Override
         public Block next() {
-            lastReturned = curr;
+            Block lastReturned = curr;
             curr = curr.next;
             return lastReturned;
         }

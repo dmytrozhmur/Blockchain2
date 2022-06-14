@@ -11,13 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static blockchain.utils.Constants.BLOCKCHAIN_SIZE;
-import static blockchain.utils.Constants.SECONDTOMILLIS;
+import static blockchain.utils.Constants.SECOND_TO_MILLIS;
 
 public class Main {
 
     public static void main(String[] args) throws InterruptedException {
-        LocalTime before = LocalTime.now();
-
         BlockChain blockChain = new BlockChain();
         List<User> users = List.of(
                 new User("Dmytro", blockChain));
@@ -29,16 +27,11 @@ public class Main {
         blockChain.setMoneyHandlers(moneyHandlers);
 
         moneyHandlers.forEach(Thread::start);
-        Thread.sleep(SECONDTOMILLIS);
+        Thread.sleep(SECOND_TO_MILLIS);
 
         for (MoneyHandler handler : moneyHandlers) {
             handler.join();
         }
         InputHelper.off();
-
-        blockChain.printBlocks(BLOCKCHAIN_SIZE);
-        LocalTime after = LocalTime.now();
-
-        System.out.println("\n" + (after.toSecondOfDay() - before.toSecondOfDay()));
     }
 }
