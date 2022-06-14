@@ -58,13 +58,7 @@ public class Block implements Serializable {
         try {
             Signature sign = Signature.getInstance(SHA_WITH_DSA);
 
-            messages
-                    .forEach(transaction -> decrypt(sign, transaction));
-//            for (Transaction message: (Set<Transaction>) messages.clone()) {
-//                sign.initVerify(message.getKey());
-//                sign.update(message.toString().getBytes());
-//                if(!sign.verify(message.getSignature())) messages.remove(message);
-//            }
+            messages.forEach(transaction -> decrypt(sign, transaction));
         } catch (NoSuchAlgorithmException nae) {
             throw new EncryptionException("Algorithm is wrong. Choose another one.");
         }
