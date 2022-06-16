@@ -16,8 +16,6 @@ public class BlockChain implements Iterable<Block>, Serializable {
     private NavigableSet<Transaction> transactions = new TreeSet<>(Comparator.comparingLong(Transaction::getId));
     private ArrayList<MoneyHandler> moneyHandlers = new ArrayList<>();
 
-    public BlockChain() {}
-
     public boolean isInvalid(Block beingChecked) {
         return !beingChecked.isProved(getN()) || (tail != null
                 && !Objects.equals(tail.hash(), beingChecked.getPreviousHash()));
@@ -58,9 +56,9 @@ public class BlockChain implements Iterable<Block>, Serializable {
     }
 
     public synchronized void addTransaction(Transaction transaction) {
-        boolean transact = transactions.isEmpty() || transaction.getId() > transactions.last().getId();
-        boolean tail = this.tail == null || this.tail.checkMessages() || transaction.getId() > this.tail.getMessages().last().getId();
-        boolean isTransactionValid = transact && tail;
+        boolean transactOkay = transactions.isEmpty() || transaction.getId() > transactions.last().getId();
+        boolean tailOkay = this.tail == null || this.tail.checkMessages() || transaction.getId() > this.tail.getMessages().last().getId();
+        boolean isTransactionValid = transactOkay && tailOkay;
         if(isTransactionValid) transactions.add(transaction);
     }
 
@@ -70,7 +68,7 @@ public class BlockChain implements Iterable<Block>, Serializable {
         return lastMessages;
     }
 
-    public long getId() {
+    public long getLastId() {
         return lastBlockId.incrementAndGet();
     }
 

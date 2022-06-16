@@ -1,6 +1,7 @@
 package blockchain.management;
 
 import blockchain.exceptions.IllegalTransactionArgumentException;
+import blockchain.exceptions.LoggingException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,18 +10,26 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static blockchain.utils.Constants.*;
 import static blockchain.utils.Encryption.getRandomNumber;
 
 public class Miner extends MoneyHandler {
-    private static final FileOutputStream errorLogger;
+    private static final Logger errorLogger = Logger.getLogger("blockchain.management.Miner");
+    private static final FileHandler handler;
 
     static {
         try {
-            errorLogger = new FileOutputStream("logger.txt", false);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            handler = new FileHandler("logger.txt");
+            errorLogger.addHandler(handler);
+            errorLogger.setLevel(Level.WARNING);
+        } catch (IOException ioe) {
+            throw new LoggingException(ioe.getMessage());
         }
     }
 
@@ -40,20 +49,15 @@ public class Miner extends MoneyHandler {
                         String.valueOf(getRandomNumber(getMoneyHeld()) + 1),
                         getRandomReceiver().toString()
                 });
-            } catch (IllegalTransactionArgumentException itae) {
-                log(itae.getMessage() + "\n");
+            } catch (RuntimeException re) {
+                log(re.getMessage() + "\n");
             }
         }
     }
 
     private void log(String message) {
-        try {
-            errorLogger.write(String
-                    .format("%s : %s : %s", LocalDateTime.now(), nickName, message)
-                    .getBytes(StandardCharsets.UTF_8));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        errorLogger.warning(String
+                    .format("%s : %s", nickName, message));
     }
 
     private Block generateBlock() {

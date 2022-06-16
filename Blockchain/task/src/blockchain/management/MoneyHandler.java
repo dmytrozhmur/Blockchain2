@@ -1,13 +1,11 @@
 package blockchain.management;
 
-import blockchain.exceptions.EncryptionException;
 import blockchain.exceptions.IllegalTransactionArgumentException;
 
 import java.security.*;
 import java.util.*;
 
-import static blockchain.utils.Constants.*;
-import static blockchain.utils.Encryption.getRandomNumber;
+import static blockchain.utils.Encryption.*;
 
 public abstract class MoneyHandler extends Thread {
     protected String nickName;
@@ -30,7 +28,7 @@ public abstract class MoneyHandler extends Thread {
 
         KeyPair pair = getKeyPair();
         Transaction transaction
-                = new Transaction(blockChain.getId(), sum, this, receiver, pair.getPublic());
+                = new Transaction(blockChain.getLastId(), sum, this, receiver, pair.getPublic());
         transaction.setSignature(createSignature(transaction.toString(), pair));
 
         this.transactions.add(transaction);
@@ -41,16 +39,6 @@ public abstract class MoneyHandler extends Thread {
 
     public String name() {
         return nickName;
-    }
-
-    protected KeyPair getKeyPair() {
-        try {
-            KeyPairGenerator generator = KeyPairGenerator.getInstance(DSA);
-            generator.initialize(KILOBYTE_TO_BYTE);
-            return generator.generateKeyPair();
-        } catch (NoSuchAlgorithmException e) {
-            throw new EncryptionException("Keys weren't generated");
-        }
     }
 
     protected int getMoneyHeld() {
@@ -64,17 +52,6 @@ public abstract class MoneyHandler extends Thread {
         }
 
         return moneyHeld;
-    }
-
-    protected byte[] createSignature(String message, KeyPair pair) {
-        try {
-            Signature sign = Signature.getInstance(SHA_WITH_DSA);
-            sign.initSign(pair.getPrivate());
-            sign.update(message.getBytes());
-            return sign.sign();
-        } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException e) {
-            throw new EncryptionException("Signature wasn't created");
-        }
     }
 
     protected MoneyHandler getRandomReceiver() {

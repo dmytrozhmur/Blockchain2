@@ -12,8 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static blockchain.utils.Constants.*;
-import static blockchain.utils.Encryption.applySHA256;
-import static blockchain.utils.Encryption.getRandomNumber;
+import static blockchain.utils.Encryption.*;
 
 public class Block implements Serializable {
     private long id;
@@ -55,26 +54,8 @@ public class Block implements Serializable {
     }
 
     public boolean checkMessages() {
-        try {
-            Signature sign = Signature.getInstance(SHA_WITH_DSA);
-
-            messages.forEach(transaction -> decrypt(sign, transaction));
-        } catch (NoSuchAlgorithmException nae) {
-            throw new EncryptionException("Algorithm is wrong. Choose another one.");
-        }
-
+        getMessages().forEach(transaction -> decrypt(messages, transaction));
         return messages.isEmpty();
-    }
-
-    private void decrypt(Signature sign, Transaction transaction) {
-        try {
-            sign.initVerify(transaction.getKey());
-            sign.update(transaction.toString().getBytes());
-            if(!sign.verify(transaction.getSignature())) messages.remove(transaction);
-        } catch (SignatureException | InvalidKeyException e) {
-            throw new EncryptionException("Unable to decrypt messages.");
-        }
-
     }
 
     public TreeSet<Transaction> getMessages() {
