@@ -11,8 +11,8 @@ public class BlockChain implements Iterable<Block>, Serializable {
     private Block head;
     private Block tail;
     private long size;
-    private AtomicLong lastBlockId = new AtomicLong(Long.parseLong(ZERO));
-    private AtomicInteger N = new AtomicInteger(Integer.parseInt(ZERO));
+    private AtomicLong lastBlockId = new AtomicLong(0L);
+    private AtomicInteger N = new AtomicInteger(0);
     private NavigableSet<Transaction> transactions = new TreeSet<>(Comparator.comparingLong(Transaction::getId));
     private ArrayList<MoneyHandler> moneyHandlers = new ArrayList<>();
 

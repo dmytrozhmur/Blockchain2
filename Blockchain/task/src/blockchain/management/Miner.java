@@ -20,7 +20,7 @@ import static blockchain.utils.Constants.*;
 import static blockchain.utils.Encryption.getRandomNumber;
 
 public class Miner extends MoneyHandler {
-    private static final Logger errorLogger = Logger.getLogger("blockchain.management.Miner");
+    private static final Logger errorLogger = Logger.getLogger(Miner.class.getCanonicalName());
     private static final FileHandler handler;
 
     static {
@@ -56,8 +56,7 @@ public class Miner extends MoneyHandler {
     }
 
     private void log(String message) {
-        errorLogger.warning(String
-                    .format("%s : %s", nickName, message));
+        errorLogger.warning(String.format("%s : %s", nickName, message));
     }
 
     private Block generateBlock() {
